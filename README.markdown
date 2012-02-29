@@ -2,7 +2,7 @@
 
 An awesome midi-based music adventure. (In the works...)
 
-## Installation
+## Setup / Installation
 
 ### Pip
 
@@ -18,4 +18,10 @@ Right now this just installs Mercurial which is necessary to setup PyGame.
 
     brew install python
     brew install sdl sdl_image sdl_mixer sdl_ttf smpeg portmidi
-    /usr/local/share/python/pip install hg+http://bitbucket.org/pygame/pygame
+    pip install hg+http://bitbucket.org/pygame/pygame
+
+### Running the game
+
+    python game.py
+
+That's it!
