@@ -1,5 +1,11 @@
 == Installation ==
 
+= Pip =
+
+(Right now this just installs Mercurial which is necessary to setup PyGame.)
+
+    pip install requirements.pip
+
 = Install python-midi =
 
     git clone https://github.com/vishnubob/python-midi.git
