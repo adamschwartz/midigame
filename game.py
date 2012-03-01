@@ -128,8 +128,8 @@ def setup_pygame():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
-            else:
-                print event
+            #else:
+                #print event
 
 def update(time):
     # blacken out screen
