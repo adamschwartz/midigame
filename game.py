@@ -109,6 +109,8 @@ def init():
             velocity = d['velocity']
             close_block = True
 
+    pp.pprint(game_map['ground'])
+
     setup_pygame()
 
 def setup_pygame():
