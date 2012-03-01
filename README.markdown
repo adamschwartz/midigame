@@ -13,10 +13,11 @@ Right now this just installs Mercurial which is necessary to setup PyGame.
 ### Install python-midi
 
     git clone https://github.com/vishnubob/python-midi.git
+    cd python-midi
+    python setup.py install
 
 ### Install PyGame
 
-    brew install python
     brew install sdl sdl_image sdl_mixer sdl_ttf smpeg portmidi
     pip install hg+http://bitbucket.org/pygame/pygame
 
