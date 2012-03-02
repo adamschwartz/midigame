@@ -15,6 +15,12 @@ scale_y = 5
 scale_x = 0.105
 '''
 
+'''
+midi_file = 'brickone.mid'
+scale_y = 5
+scale_x = 0.1
+'''
+
 pp = pprint.PrettyPrinter(indent=1)
 
 window_width = 800
