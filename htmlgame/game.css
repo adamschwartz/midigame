@@ -4,7 +4,6 @@
 html, body {
     padding: 0px;
     margin: 0px;
-    background: #000;
     overflow: hidden;
     height: 100%;
     width: 100%
@@ -27,12 +26,30 @@ html, body {
         -webkit-transform: scale(1);
     }
 }
+html.default, html.default body {
+    background: #000;
+    box-shadow: inset 0px 0px 200px rgba(0, 30, 150, 0.3);
+}
+html.dark, html.dark body {
+    background: #444;
+    box-shadow: inset 0px 0px 200px rgba(0, 120, 50, 0.5);
+}
+html.pink, html.pink body {
+    box-shadow: inset 0px 0px 200px rgba(0, 20, 5, 0.5);
+    background: pink;
+}
 .flyinout {
     -webkit-perspective: 1000;
     -webkit-backface-visibility: hidden;
     -webkit-animation: flyinout 5s;
      -webkit-animation-iteration-count: 1;
      -webkit-animation-timing-function: ease-out;
+}
+#camera {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
 }
 #ground {
     position: absolute;
