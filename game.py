@@ -68,7 +68,7 @@ def init():
             midi_dict[p].append(n)
             prev_tick = n['tick']
 
-    print len(midi_dict)
+    #print len(midi_dict)
 
     # sort each pitch's list of note events in time
     for p, n in midi_dict.iteritems():
@@ -87,9 +87,9 @@ def init():
     # find pitch boundaries and set basic parameters
     pitches = sorted(midi_dict.keys())
     lowest = pitches[0]
-    #highest = pitches[-1:][0]
+    highest = pitches[-1:][0]
 
-    pp.pprint(midi_dict)
+    #pp.pprint(midi_dict)
 
     # generate map
     for p, n in midi_dict.iteritems():
@@ -116,6 +116,24 @@ def init():
             close_block = True
 
     pp.pprint(game_map['ground'])
+
+    collision_map = [[] for i in range((highest - lowest) + 1)]
+    for g in game_map['ground']:
+        normalized_p = g['note']['pitch'] - lowest
+
+        left_block_side = int((g['rect'][0] / scale_x) / 20)
+        right_block_side = int(((g['rect'][0] + g['rect'][2]) / scale_x) / 20)
+
+        if right_block_side >= len(collision_map[normalized_p]):
+            for m in range(len(collision_map[normalized_p]), right_block_side):
+                collision_map[normalized_p].append(0)
+
+        for m in range(left_block_side, right_block_side):
+            collision_map[normalized_p][m] = 1
+
+    f = open(midi_file + '.json', 'w')
+    f.write(str(collision_map))
+    #print collision_map
 
     setup_pygame()
 
