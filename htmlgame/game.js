@@ -1,256 +1,279 @@
-var game = {};
-var midi = {};
+var game = {
+        songs: {}
+    }
+;
 
-$(function(){
-    game.first_piece = {'note': {/* 'color': 'white', */'pitch': 100, 'velocity': 72}, 'rect': [-1500, 340, 1450, 20]};
-    game.map = {};
+$(function() {
+    var g = game;
 
-    game.map.ground = midi.mary;
-    //game.map.ground = midi.brickone;
+    g.song = 'mary'; //had a little lamb
 
-    game.map.ground.push(game.first_piece);
+    //g.dev_mode = true; // TODO ---
 
-    game.dev_mode = true;
+    g.dom = {};
 
-    game.dom = {};
+    g.dom.camera     = $('#camera');
+    g.dom.background = $('#background');
+    g.dom.ground     = $('#ground').css('zIndex', 5);
+    g.dom.dude       = $('#dude-sprite');//.css('zIndex', 30);
 
-    game.dom.camera     = $('#camera');
-    game.dom.ground     = $('#ground').css('zIndex', 5);
-    game.dom.dude       = $('#dude')  .css('zIndex', 6);
-    game.dom.dude_parts = game.dom.dude.find('.head, .body');
+    g.dom.dude.append('<img src="dudesprite32.png" />');
 
-    game.themes = ['default', 'pink', 'dark'];
-    game.theme = '';
+    g.dom.dude.find('.body').hide();
 
-    game.default_gravity = 0.001;
-    game.gravity = game.default_gravity;
+    g.themes = ['black', 'pink', 'grey', 'white'];
+    g.theme = g.themes[0];
 
-    game.max_vy = 1.5;
-    game.min_vy = -1;
+    g.gravity = 0.08;
 
-    game.end = 0;
+    g.max_vy = 1.5;
+    g.min_vy = -1;
 
-    game.last_jump = 0;
+    g.end = 0;
 
-    game.dude = {};
-    game.dude.vx = 0;
-    game.dude.vy = 0;
+    g.last_jump = 0;
 
-    game.dude.css = {};
-    game.dude.css.height = 90;
-    game.dude.css.width = 30;
+    g.dude = {};
+    g.dude.sprite_states = {
+        JUMPLEFT: 0,
+        RUNLEFT1: 1,
+        RUNLEFT2: 2,
+        RUNLEFT3: 3,
+        STANDLEFT: 5,
+        STANDRIGHT: 6,
+        RUNRIGHT1: 7,
+        RUNRIGHT2: 8,
+        RUNRIGHT3: 9,
+        JUMPRIGHT: 11
+    };
+    g.dude.vx = 0;
+    g.dude.vy = 0;
 
-    game.dude_parts = {};
-    game.dude_parts.css = {};
-    game.dude_parts.css.background = '1px solid rgb(21, 195, 88, 0.6)';
-    game.dude_parts.css.boxShadow = '0px -5px 20px rgba(21, 195, 88, 0.8), inset 0px -5px 20px rgba(21, 195, 88, 0.8)';
+    g.dude.css = {};
+    g.dude.css.height = 90;
+    g.dude.css.width = 30;
 
-    game.ground = {};
+    g.dude_parts = {};
+    g.dude_parts.css = {};
+    g.dude_parts.css.background = '1px solid rgb(21, 195, 88, 0.6)';
+    g.dude_parts.css.boxShadow = '0px -5px 20px rgba(21, 195, 88, 0.8), inset 0px -5px 20px rgba(21, 195, 88, 0.8)';
 
-    game.depressed_keys = {};
+    g.ground = {};
 
-    game.fps = 1000 / 30;
-    game.tick = 0;
-    game.pause = false;
+    g.depressed_keys = {};
 
-    game.init = function() {
-        game.setup_key_handlers();
-        game.draw_ground();
+    g.fps = 30;
+    g.tick = 0;
+    g.pause = false;
 
-        //initialize object locations
-        game.init_game_object_locations();
+    g.block_scale = 32;
 
-        game.render();
-        game.dom.camera.show();
+    g.block_border_width = 2;
+
+    g.dude.pos = [8, 13 - $(window).height() / g.block_scale];
+    g.dude.vel = [0, 0];
+    //g.dude.vel_min = [-0.4, -0.85];
+    //g.dude.vel_max = [0.4, 0.8];
+    g.dude.vel_min = [-0.7, -1.25];
+    g.dude.vel_max = [0.7, 1.2];
+    g.dude.dir = 0;
+    g.dude.face_dir = 1;
+    g.dude.on_ground = 0;
+
+    g.current_scroll = 0;
+
+    g.init = function() {
+        g.setup_key_handlers();
+
+        g.draw_ground(true);/* Math.random() > 0.5 */
+        g.dude_set_sprite(g.dude.sprite_states.JUMPRIGHT);
 
         setInterval(function(){
-            if (!game.pause) {
-                game.tick += 1;
-                game.render();
+            if (!g.pause) {
+                g.tick += 1;
+                g.do_dude_stuff();
             }
-            game.check_depressed_keys();
-        }, game.fps);
+        }, 1000 / g.fps);
     };
 
-    game.init_game_object_locations = function() {
-        game.tempo = 0;
-        game.dude.css.top = -5000;
-        game.dude.css.left = $(window).width() / 2;
-        game.ground.left = 1300 + ($(window).width() / 2);
+    g.dude_set_sprite = function(id) {
+        g.dom.dude.scrollLeft(id * g.block_scale);
     };
 
-    game.render = function() {
-        game.dom.ground.css('left', game.ground.left);
-        game.update_camera_position();
-        game.update_dude_position();
-        //game.update_camera_position(); //TODO - investigate timing of camera positioning vs player
-        game.helpers.dude_collision();
-        game.dom.dude.css(game.dude.css);
-        game.dom.dude_parts.css(game.dude_parts.css);
-
-        //turn on house music :P
-        //game.dom.ground.css('opacity', (100 - (game.tick % 25) * 5) * 0.01);
+    g.render = function() {
+        g.tick += 1;
+        g.do_mario_stuff();
     };
 
-    game.setup_key_handlers = function() {
-        $('body')
+    g.do_dude_stuff = function() {
+        var velIncX = 0.05;
+        if (g.dude.dir) {
+            g.dude.face_dir = g.dude.dir;
+            g.dude.vel[0] += velIncX * g.dude.dir;
+        } else {
+            g.dude.vel[0] *= 0.8;
+            if (Math.abs(g.dude.vel[0]) < 0.05) {
+                g.dude.vel[0] = 0;
+            }
+        }
+
+        g.current_scroll += 10;
+        g.dom.background.scrollLeft(g.current_scroll);
+
+        g.dude.vel[1] += g.gravity;
+
+        if (g.dude.vel[0] > g.dude.vel_max[0]) g.dude.vel[0] = g.dude.vel_max[0];
+        if (g.dude.vel[0] < g.dude.vel_min[0]) g.dude.vel[0] = g.dude.vel_min[0];
+        if (g.dude.vel[1] > g.dude.vel_max[1]) g.dude.vel[1] = g.dude.vel_max[1];
+        if (g.dude.vel[1] < g.dude.vel_min[1]) g.dude.vel[1] = g.dude.vel_min[1];
+
+        var newPos = [
+            g.dude.pos[0] + g.dude.vel[0],
+            g.dude.pos[1] + g.dude.vel[1]
+        ];
+
+        if (g.dude.on_ground) {
+            if (g.dude.vel[0] === 0) {
+                walkCycle = 0;
+                g.dude_set_sprite(g.dude.face_dir < 0 ? g.dude.sprite_states.STANDLEFT : g.dude.sprite_states.STANDRIGHT);
+            } else {
+                walkCycle += 0.5;
+                if (walkCycle >= 3) walkCycle = 0;
+                g.dude_set_sprite(
+                    (g.dude.vel[0] < 0 ? g.dude.sprite_states.RUNLEFT1 : g.dude.sprite_states.RUNRIGHT1) + (walkCycle >> 0)
+                );
+            }
+        } else {
+            walkCycle = 0;
+            g.dude_set_sprite(g.dude.face_dir < 0 ? g.dude.sprite_states.JUMPLEFT : g.dude.sprite_states.JUMPRIGHT);
+        }
+
+        g.dude.pos = g.helpers.dude_collision_new(g.dude.pos, newPos);
+
+        if (g.dude.pos[0] != newPos[0]) g.dude.vel[0] = 0;
+        if (g.dude.pos[1] != newPos[1]) g.dude.vel[1] = 0;
+
+        if (g.dude.pos[1] > 30) g.dude.pos[1] = g.songs[g.song].collisions.length - $(window).height()/g.block_scale;
+
+        g.dom.dude.css({
+            left: g.dude.pos[0]*g.block_scale,
+            bottom: g.songs[g.song].collisions.length * g.block_scale - g.dude.pos[1] * g.block_scale
+        });
+
+        g.dom.camera.css({
+            //left: ($(window).width() / 2) - g.dude.css.left,
+            top: ((g.songs[g.song].collisions.length * g.block_scale - g.dude.pos[1] * g.block_scale) - $(window).height() / 2)
+        });
+    };
+
+    g.draw_ground = function(fullBlocks) {
+        var i, j, k, l, c;
+
+        for (i in g.songs[g.song].collisions) {
+            for (j = 0; j < g.songs[g.song].collisions[i].length; j++) {
+                if (g.songs[g.song].collisions[i][j] === 1) {
+                    k = 0;
+                    if (fullBlocks) {
+                        while (g.songs[g.song].collisions[i][j + k] === 1) {
+                            k++;
+                        }
+                        k--;
+                    }
+                    l = {
+                        note: {
+                            pitch: g.songs[g.song].lowest_pitch + i
+                        },
+                        rect: [
+                            j * g.block_scale,
+                            (g.songs[g.song].collisions.length - i) * g.block_scale,
+                            (((j + (k + 1)) - j) * g.block_scale) - (2 * g.block_border_width),
+                            g.block_scale - (2 * g.block_border_width)
+                        ]
+                    };
+                    if (l.rect[0] < 20000) { //TODO - dynamically load the part of the ground we need
+                        if (l.rect[0] > g.end) {
+                            g.end = l.rect[0];
+                        }
+                        //c = l.note.color ? l.note.color : 'rgba(100, 200, ' + (30 * (l.note.pitch % 12)) + ', 1)'; //green
+                        c = l.note.color ? l.note.color : 'rgba(' + (30 * (l.note.pitch % 12)) + ', 100, 200, 1)'; //purple
+                        l.dom = $('<div/>')
+                            .addClass('block')
+                            .css({
+                                left: l.rect[0],
+                                bottom: l.rect[1],
+                                width: l.rect[2],
+                                height: l.rect[3],
+                                border: g.block_border_width + 'px solid ' + c,
+                                borderRadius: g.block_scale + 'px'//,
+                                //boxShadow: '0px 0px ' + g.block_scale + 'px ' + c + ', inset 0px 0px ' + parseInt(g.block_scale * 0.85, 10) + 'px ' + c
+                            })
+                            .data('ground', l)
+                        ;
+                        g.dom.background.append(l.dom);
+                    }
+                    j = j + k;
+                }
+            }
+        }
+    };
+
+    g.setup_key_handlers = function() {
+        $(document)
             .keydown(function(e){
-                game.depressed_keys[e.keyCode] = true;
-                return false;
+                switch (e.which) {
+                    case 39: // right
+                        g.dude.dir = 1;
+                    break;
+                    case 37: // left
+                        g.dude.dir = -1;
+                    break;
+                    case 38: // up
+                        if (g.dude.on_ground) {
+                            g.dude.vel[1] = g.dude.vel_min[1];
+                        }
+                    break;
+                    case 32: //spacebar
+                        //if (g.dev_mode) {}
+                        g.toggle_pause();
+                    break;
+                    case 67: //c is for color :)
+                        g.cycle_theme();
+                    break;
+                }
+                //console.log(e.which)
             })
             .keyup(function(e){
-                delete game.depressed_keys[e.keyCode];
-                return false;
+                switch (e.which) {
+                    case 39: // right
+                        if (g.dude.dir === 1) {
+                            g.dude.dir = 0;
+                        }
+                    break;
+                    case 37: // left
+                        if (g.dude.dir === -1) {
+                            g.dude.dir = 0;
+                        }
+                    break;
+                }
             })
         ;
     };
 
-    game.update_camera_position = function() {
-        // TODO - make these smoother
-
-        /*
-        // trippy...
-        game.dom.camera.css({
-            left: game.dude.css.left - ($(window).width() / 2),
-            top: game.dude.css.top - ($(window).height() / 2)
-        });
-        */
-
-        game.dom.camera.css({
-            //left: ($(window).width() / 2) - game.dude.css.left,
-            top: ($(window).height() / 2) - game.dude.css.top
-        });
-
-        game.ground.left -= game.tempo;
-        if (game.ground.left * -1 > game.end + 1000) {
-            game.init_game_object_locations();
-        }
+    g.cycle_theme = function() {
+        g.theme = g.themes[(g.themes.indexOf(g.theme) + 1) % g.themes.length];
+        $('html').get(0).className = g.theme;
     };
 
-    game.update_dude_position = function() {
-        var dx, dy, t, vx, vy;
-        dx = dy = vx = vy = 0;
-        t = game.fps;
-
-        vy = game.dude.vy + (game.gravity * t);
-        vy = Math.max(Math.min(game.max_vy, vy), game.min_vy);
-        dy = 0.5 * (game.dude.vy + vy) * t;
-        game.dude.vy = vy;
-
-        vx = game.dude.vx * (0.8 + (0.2 * Math.min(game.dude.vx, 0.8)));
-        dx = 0.5 * (game.dude.vx + vx) * t;
-        game.dude.vx = vx;
-
-        //dy = (game.dude.vx * t);
-        game.dude.css.top += dy;
-        game.dude.css.left += dx - game.tempo;
-
-        if (game.dude.css.top > $(window).height()) {
-            game.dude.css.top = -10 - game.dude.css.height;
-        }
+    g.toggle_pause = function() {
+        g.pause = !g.pause;
     };
 
-    game.jump_dude = function() {
-        // don't let jump happen too often
-        if (game.last_jump < game.tick - 20) {
-            if (game.helpers.dude_on_ground()) {
-                game.last_jump = game.tick;
-                game.dude.vy -= 0.5;
-            }
-        }
-    };
 
-    game.check_depressed_keys = function() {
-        var k;
-        for (k in game.depressed_keys) {
-            k = parseInt(k, 10);
+    // Animations
 
-            switch (k) {
-                case 32: //spacebar
-                    //if (game.dev_mode) {}
-                    game.toggle_pause();
-                    delete game.depressed_keys[32];
-                break;
-                case 67: //c is for color :)
-                    game.cycle_theme();
-                    delete game.depressed_keys[67];
-                break;
-            }
+    g.animations = {};
 
-            if (!game.pause) {
-                switch (k) {
-                    case 37: //left
-                        game.dude.vx -= 0.05;
-                    break;
-                    case 39: //right
-                        game.tempo = 6;
-                        game.dude.vx += 0.05;
-                    break;
-                    case 38: //up
-                    case 91: //command
-                    case 16: //shift
-                    case 17: //option
-                        game.jump_dude();
-                    break;
-                    case 77: //m for mega dude!
-                        if (game.dude.css.height !== 90) {
-                            game.dude.css.height = 90;
-                            game.dude.css.width = 30;
-                        } else {
-                            game.dude.css.height = 120;
-                            game.dude.css.width = 40;
-                        }
-                        delete game.depressed_keys[77];
-                    break;
-                    //case 40: //down for charge?
-                    //shooting? etc...
-                    default:
-                        console.log(k);
-                    break;
-                }
-            }
-        }
-    };
-
-    game.cycle_theme = function() {
-        game.theme = game.themes[(game.themes.indexOf(game.theme) + 1) % game.themes.length];
-        $('html').get(0).className = game.theme;
-    };
-
-    game.toggle_pause = function() {
-        game.pause = !game.pause;
-    };
-
-    game.draw_ground = function() {
-        var i, g, r, c;
-        for (i in game.map.ground) {
-            g = game.map.ground[i];
-            if (g.rect[0] < 20000) { //TODO - dynamically load the part of the ground we need
-                if (g.rect[0] > game.end) {
-                    game.end = g.rect[0];
-                }
-                c = g.note.color ? g.note.color : 'rgba(' + (30 * (g.note.pitch % 12)) + ', 100, 200, 1)';
-                g.rect[2] = Math.max(g.rect[2], 100);
-                g.dom = $('<div/>')
-                    .addClass('block')
-                    .css({
-                        left: g.rect[0],
-                        top: g.rect[1],
-                        width: g.rect[2],
-                        height: g.rect[3],
-                        border: '2px solid ' + c,
-                        boxShadow: '0px 0px 20px ' + c + ', inset 0px 0px 20px ' + c
-                    })
-                    .data('ground', g)
-                ;
-                game.dom.ground.append(g.dom);
-            }
-        }
-    };
-
-    game.animations = {};
-
-    game.animations.block_dude_collision = function(block, offset) {
+    g.animations.block_dude_collision = function(block, offset) {
         var landing = $('<div />'),
             relative = block.find('.relative')
         ;
@@ -269,80 +292,111 @@ $(function(){
         }, 3000);
     };
 
-    game.helpers = {};
 
-    game.helpers.dude_on_ground = function() {
-        return game.gravity === 0; //TODO - fix this
-    };
+    // Helper functions
 
-    game.helpers.dude_collision = function() {
-        var i, g,
-            collide = false,
-            x1, y1, w1, h1, x2, y2, w2, h2
-        ;
-        x2 = game.dude.css.left;
-        y2 = game.dude.css.top;
-        w2 = game.dude.css.width;
-        h2 = game.dude.css.height;
+    g.helpers = {};
 
-        for (i in game.map.ground) {
-            g = game.map.ground[i];
+    g.helpers.dude_collision_new = function(pos1, pos2) {
+        var oldX = pos1[0];
+        var oldY = pos1[1];
+        var newX = pos2[0];
+        var newY = pos2[1];
 
-            x1 = g.rect[0] + game.ground.left;
-            y1 = g.rect[1];
-            w1 = g.rect[2];
-            h1 = g.rect[3];
+        var collision, xAdjust = 0;
 
-            if (game.helpers.collision(x1, y1, w1, h1, x2, y2, w2, h2)) {
-                collide = true;
-                break;
-            }
-        }
-        if (collide === true) {
-            if (x2 > x1 && x2 + w2 < x1 + g.rect[2]) {
-                if (y2 < g.rect[1] && y2 + h2 < g.rect[1] + g.rect[3] && game.dude.vy > 0) {
-                    //game.dude.vy *= -0.1;
-                    game.dude.vy = 0;
-                    game.gravity = 0;
-                    game.dude.css.top = y1 - (h2 - 1);
-                    game.animations.block_dude_collision(g.dom, (x1 + 0.5 * w1) - (x2 + 0.5 * w2));
-                } else {
-                    game.dude.vy = game.dude.vy * 0.4;
-                    if (game.dude.vy < 0) {
-                        //game.dude.vy *= -0.5;
-                        game.dude.vy = 0;
-                    } else {
-                        game.dude.css.top = y1 - (h2 - 1);
-                        //game.dude.vy *= -0.5;
-                        game.dude.vy = 0;
-                    }
+        var space = 1/g.block_scale;
+
+        g.dude.on_ground = false;
+
+        if (oldY != newY) { // moving vertically
+            if (newY > oldY) { // moving down
+                // lower left collision
+                collision = g.helpers.blocking(newX + space, newY + 1);
+                if (collision && !g.helpers.blocking(newX + space, newY)) {
+                    newY -= collision[1];
+                    g.dude.on_ground = true;
                 }
+
+                // lower right collision
+                collision = g.helpers.blocking(newX + 1-space, newY + 1);
+                if (collision && !g.helpers.blocking(newX + 1-space, newY)) {
+                    newY -= collision[1];
+                    g.dude.on_ground = true;
+                }
+
+                if (g.dude.on_ground === true) {
+                    //TODO - map collision back to block! :(
+
+                    //g.animations.block_dude_collision(g.dom, (x1 + 0.5 * w1) - (x2 + 0.5 * w2));
+                }
+            // moving up
             } else {
-                if (y2 + h2 > x1 + h1) {
-                    if (x2 > x1) {
-                        x2 = x1 + g.rect[2] + 1;
-                    } else {
-                        x2 = x1 - w2 - 1;
-                    }
-                    game.dude.vx = 0;
+
+                // upper left collision
+                collision = g.helpers.blocking(newX + space, newY);
+                if (collision && !g.helpers.blocking(newX + space, newY + 1)) {
+                    newY += (1 - collision[1]);
+                }
+
+                // upper right collision
+                collision = g.helpers.blocking(newX + 1 - space, newY);
+                if (collision && !g.helpers.blocking(newX + 1 - space, newY + 1)) {
+                    newY += (1 - collision[1]);
                 }
             }
-            if (game.dev_mode) {
-                game.dude_parts.css.background = 'rgba(50, 0, 0, 0.6)';
-                game.dude_parts.css.boxShadow = '0px -5px 20px red, inset 0px -5px 20px red';
+
+        }
+        // moving horizontally
+        if (oldX != newX) {
+
+            // moving right
+            if (newX > oldX) {
+
+                // lower right collision
+                collision = g.helpers.blocking(newX + 1, newY + 1-space);
+                if (collision) {
+                    newX -= collision[0];
+                }
+
+                // upper right collision
+                collision = g.helpers.blocking(newX + 1, newY);
+                if (collision) {
+                    newX -= collision[0];
+                }
+
+            // moving left
+            } else {
+
+                // lower left collision
+                collision = g.helpers.blocking(newX, newY + 1-space);
+                if (collision) {
+                    newX += (1 - collision[0]);
+                }
+
+                // upper left collision
+                collision = g.helpers.blocking(newX, newY);
+                if (collision) {
+                    newX += (1 - collision[0]);
+                }
             }
-        } else {
-            game.gravity = game.default_gravity;
-            if (game.dev_mode) {
-                game.dude_parts.css.background = '1px solid rgb(21, 195, 88, 0.6)';
-                game.dude_parts.css.boxShadow = '0px -5px 20px rgba(21, 195, 88, 0.8), inset 0px -5px 20px rgba(21, 195, 88, 0.8)';
-            }
+        }
+
+        return [newX, newY];
+    };
+
+    g.helpers.blocking = function(x, y) {
+        var tx = x >> 0;
+        var ty = y >> 0;
+
+        if (g.songs[g.song].collisions[ty] && (g.songs[g.song].collisions[ty][tx] || typeof g.songs[g.song].collisions[ty][tx] == 'undefined')) {
+            return [x - tx, y - ty];
         }
     };
 
-    game.helpers.collision = function(x1, y1, w1, h1, x2, y2, w2, h2) {
-        return x2 < (x1 + w1) && (x2 + w2) > x1 && y2 < (y1 + h1) && (y2 + h2) > y1;
-    };
 
-    game.init();
+    // Start the g
+
+    g.init();
+
 });

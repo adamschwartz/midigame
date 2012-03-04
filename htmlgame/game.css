@@ -1,6 +1,11 @@
+/* Setup */
+
 * {
     user-select: none;
+    margin: 0;
+    padding: 0;
 }
+
 html, body {
     padding: 0px;
     margin: 0px;
@@ -8,6 +13,7 @@ html, body {
     height: 100%;
     width: 100%
 }
+
 @-webkit-keyframes 'flyinout' {
     0% {
         opacity: 0;
@@ -26,34 +32,69 @@ html, body {
         -webkit-transform: scale(1);
     }
 }
-html.default, html.default body {
-    background: #000;
-    box-shadow: inset 0px 0px 200px rgba(0, 30, 150, 0.3);
-}
-html.dark, html.dark body {
-    background: #444;
-    box-shadow: inset 0px 0px 200px rgba(0, 120, 50, 0.5);
-}
-html.pink, html.pink body {
-    box-shadow: inset 0px 0px 200px rgba(0, 20, 5, 0.5);
-    background: pink;
-}
+
 .flyinout {
     -webkit-perspective: 1000;
     -webkit-backface-visibility: hidden;
     -webkit-animation: flyinout 5s;
-     -webkit-animation-iteration-count: 1;
-     -webkit-animation-timing-function: ease-out;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: ease-out;
 }
+
+/*
+.relative {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+*/
+
+
+/* Game elements */
+
 #camera {
     position: absolute;
     top: 0px;
     left: 0px;
     width: 100%;
+    height: 100%;
 }
+
+#background {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    overflow-x: hidden;
+    z-index: 10;
+}
+
+    .block {
+        position: absolute;
+    }
+
+#dude-sprite {
+    width: 32px;
+    height: 32px;
+    overflow: hidden;
+    position: absolute;
+    left: -999px;
+
+
+    text-indent: -999px; /* kills the sprite image */
+    border-radius: 100px;
+    border: 2px solid rgba(21, 195, 88, 0.6);
+    box-shadow: 0px -5px 20px rgba(21, 195, 88, 0.8), inset 0px -5px 20px rgba(21, 195, 88, 0.8);
+    width: 28px;
+    height: 28px;
+}
+
+/*
 #ground {
     position: absolute;
 }
+
 #dude {
     position: absolute;
 }
@@ -87,13 +128,37 @@ html.pink, html.pink body {
         border: 1px solid hsla(0, 100%, 100%, 0.24);
         box-shadow: 0px -5px 11px rgba(255, 255, 255, 0.3), inset 0px 0px 16px rgba(255, 255, 255, 0.3);
     }
-.block {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
+
+*/
+
+
+/* Themes */
+
+html.black, html.black body {
+    background: #000;
+    box-shadow: inset 0px 0px 200px rgba(0, 30, 150, 0.3);
 }
-.relative {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    .black .block {
+        background: rgba(0, 0, 0, 0.3);
+    }
+html.white, html.white body {
+    background: #fff;
+    box-shadow: inset 0px 0px 200px rgba(0, 30, 150, 0.3);
 }
+    .white .block {
+        background: -webkit-linear-gradient(top, rgba(0, 30, 150, 0.0), rgba(0, 30, 150, 0.05));
+    }
+html.grey, html.grey body {
+    background: #444;
+    box-shadow: inset 0px 0px 200px rgba(0, 120, 50, 0.5);
+}
+    .grey .block {
+        background: rgba(0, 0, 0, 0.3);
+    }
+html.pink, html.pink body {
+    box-shadow: inset 0px 0px 200px rgba(0, 20, 5, 0.5);
+    background: pink;
+}
+    .pink .block {
+        background: rgba(0, 30, 150, 0.05);
+    }
