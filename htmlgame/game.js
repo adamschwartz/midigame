@@ -30,6 +30,7 @@ $(function() {
 
     g.dom.camera     = $('#camera');
     g.dom.background = $('#background');
+    g.dom.song_background = $('#background .song-background');
     g.dom.ground     = $('#ground').css('zIndex', 5);
     g.dom.dude       = $('#dude-sprite');//.css('zIndex', 30);
 
