@@ -143,6 +143,20 @@ $(function() {
         g.current_scroll += g.tempo;
         g.dom.background.scrollLeft(g.current_scroll);
 
+        var currentTimeBlocks = g.songs[g.song].time_map_starts[parseInt((g.current_scroll + $(window).width() / 2) / g.block_scale, 10)];
+        if (currentTimeBlocks && currentTimeBlocks.length) {
+            $.each(currentTimeBlocks, function(i, $block){
+                $block.addClass('highlighted');
+            });
+        }
+
+        var currentTimeBlocksOff = g.songs[g.song].time_map_finish[parseInt((g.current_scroll + $(window).width() / 2) / g.block_scale, 10)];
+        if (currentTimeBlocksOff && currentTimeBlocksOff.length) {
+            $.each(currentTimeBlocksOff, function(i, $block){
+                $block.removeClass('highlighted');
+            });
+        }
+
         g.dude.vel[1] += g.gravity;
 
         if (g.dude.vel[0] > g.dude.vel_max[0]) g.dude.vel[0] = g.dude.vel_max[0];
