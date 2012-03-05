@@ -81,13 +81,15 @@ $(function() {
 
     g.fps = 30;
     g.tick = 0;
+    g.tempo = 0;
     g.pause = false;
 
     g.block_scale = 32;
-
     g.block_border_width = 2;
+    g.starting_block_x = 3;
+    g.starting_block_y = -30;
 
-    g.dude.pos = [8, 13 - $(window).height() / g.block_scale];
+    g.dude.pos = [g.starting_block_x, g.starting_block_y];
     g.dude.vel = [0, 0];
     //g.dude.vel_min = [-0.4, -0.85];
     //g.dude.vel_max = [0.4, 0.8];
@@ -100,7 +102,10 @@ $(function() {
     g.current_scroll = 0;
 
     g.init = function() {
+        g.dom.camera.css('left', ($(window).width() / 2) - ((g.starting_block_x + 0.5) * g.block_scale));
+
         g.setup_key_handlers();
+        g.setup_window_resize();
 
         g.draw_ground(true);/* Math.random() > 0.5 */
         g.dude_set_sprite(g.dude.sprite_states.JUMPRIGHT);
@@ -108,7 +113,7 @@ $(function() {
         setInterval(function(){
             if (!g.pause) {
                 g.tick += 1;
-                g.do_dude_stuff();
+                g.render();
             }
         }, 1000 / g.fps);
     };
@@ -119,11 +124,12 @@ $(function() {
 
     g.render = function() {
         g.tick += 1;
-        g.do_mario_stuff();
+        g.do_dude_stuff();
     };
 
     g.do_dude_stuff = function() {
         var velIncX = 0.05;
+
         if (g.dude.dir) {
             g.dude.face_dir = g.dude.dir;
             g.dude.vel[0] += velIncX * g.dude.dir;
@@ -134,7 +140,7 @@ $(function() {
             }
         }
 
-        g.current_scroll += 10;
+        g.current_scroll += g.tempo;
         g.dom.background.scrollLeft(g.current_scroll);
 
         g.dude.vel[1] += g.gravity;
@@ -170,7 +176,7 @@ $(function() {
         if (g.dude.pos[0] != newPos[0]) g.dude.vel[0] = 0;
         if (g.dude.pos[1] != newPos[1]) g.dude.vel[1] = 0;
 
-        if (g.dude.pos[1] > 30) g.dude.pos[1] = g.songs[g.song].collisions.length - $(window).height()/g.block_scale;
+        if (g.dude.pos[1] > g.songs[g.song].collisions.length) g.dude.pos[1] = g.starting_block_y;
 
         g.dom.dude.css({
             left: g.dude.pos[0]*g.block_scale,
@@ -179,12 +185,15 @@ $(function() {
 
         g.dom.camera.css({
             //left: ($(window).width() / 2) - g.dude.css.left,
-            top: ((g.songs[g.song].collisions.length * g.block_scale - g.dude.pos[1] * g.block_scale) - $(window).height() / 2)
+            top: (((- g.dude.pos[1]) * g.block_scale) - $(window).height() / 2)
         });
     };
 
     g.draw_ground = function(fullBlocks) {
         var i, j, k, l, c;
+
+        g.songs[g.song].time_map_starts = {};
+        g.songs[g.song].time_map_finish = {};
 
         for (i in g.songs[g.song].collisions) {
             for (j = 0; j < g.songs[g.song].collisions[i].length; j++) {
@@ -226,13 +235,38 @@ $(function() {
                             })
                             .data('ground', l)
                         ;
+
                         g.dom.background.append(l.dom);
+
+                        if (!g.songs[g.song].time_map_starts[j]) {
+                            g.songs[g.song].time_map_starts[j] = [];
+                        }
+                        g.songs[g.song].time_map_starts[j].push(l.dom);
+
+                        if (!g.songs[g.song].time_map_finish[(j + (k + 1))]) {
+                            g.songs[g.song].time_map_finish[(j + (k + 1))] = [];
+                        }
+                        g.songs[g.song].time_map_finish[(j + (k + 1))].push(l.dom);
                     }
                     j = j + k;
                 }
             }
         }
+
+
+        g.dom.song_background.css({
+            left: 1184,
+            width: (g.songs[g.song].collisions[0].length * g.block_scale) - 1184
+        });
     };
+
+    $.extend($.easing, {
+        easeInSine: function (x, t, b, c, d) {
+            return -c * Math.cos(t/d * (Math.PI/2)) + c + b;
+        }
+    });
+
+    g.first_time_going = true;
 
     g.setup_key_handlers = function() {
         $(document)
@@ -240,6 +274,13 @@ $(function() {
                 switch (e.which) {
                     case 39: // right
                         g.dude.dir = 1;
+                        if (g.first_time_going) {
+                            console.log('first!');
+                            g.dom.camera.stop().animate({ left: 0 }, 400 * g.songs[g.song].tempo, 'easeInSine', function(){
+                                g.tempo = g.songs[g.song].tempo;
+                            });
+                            g.first_time_going = undefined;
+                        }
                     break;
                     case 37: // left
                         g.dude.dir = -1;
@@ -274,6 +315,14 @@ $(function() {
                 }
             })
         ;
+    };
+
+    g.setup_window_resize = function() {
+        $(window).resize(function(){
+            g.dom.camera.css({
+                height: g.songs[g.song].collisions.length * g.block_scale + $(window).height()
+            });
+        }).resize();
     };
 
     g.cycle_theme = function() {
