@@ -3,6 +3,22 @@ var game = {
     }
 ;
 
+// Patching layerX and layerY bug to circumvent breakage due to
+// webkit (and forthcoming mozilla) deprecation
+// code from: http://stackoverflow.com/questions/7825448/webkit-issues-with-event-layerx-and-event-layery
+// jquery ticket: http://bugs.jquery.com/ticket/10531
+(function($){
+    // remove layerX and layerY
+    var all = $.event.props,
+        len = all.length,
+        res = [];
+    while (len--) {
+      var el = all[len];
+      if (el != 'layerX' && el != 'layerY') res.push(el);
+    }
+    $.event.props = res;
+}(jQuery));
+
 $(function() {
     var g = game;
 
