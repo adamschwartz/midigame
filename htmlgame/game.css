@@ -70,9 +70,30 @@ html, body {
     z-index: 10;
 }
 
+    .song-background {
+        background: url(backgrounds/graphy.png) 1px bottom;
+        bottom: 32px;
+        height: 100%;
+        position: absolute;
+    }
+
+    .intro-background {
+        background: url(backgrounds/graphy-fade.png) 0px bottom;
+        bottom: 32px;
+        height: 100%;
+        position: absolute;
+        left: 417px;
+        width: 767px;
+        opacity: 0.48;
+    }
+
     .block {
         position: absolute;
     }
+
+        .block.highlighted {
+            border: 2px solid #fff !important;
+        }
 
 #dude-sprite {
     width: 32px;
@@ -138,27 +159,38 @@ html.black, html.black body {
     background: #000;
     box-shadow: inset 0px 0px 200px rgba(0, 30, 150, 0.3);
 }
+
     .black .block {
         background: rgba(0, 0, 0, 0.3);
     }
+
 html.white, html.white body {
     background: #fff;
     box-shadow: inset 0px 0px 200px rgba(0, 30, 150, 0.3);
 }
+
     .white .block {
         background: -webkit-linear-gradient(top, rgba(0, 30, 150, 0.0), rgba(0, 30, 150, 0.05));
     }
+
+        .white .block.highlighted {
+            background: -webkit-linear-gradient(top, rgba(0, 30, 150, 0.3), rgba(0, 30, 150, 0.38));
+        }
+
 html.grey, html.grey body {
     background: #444;
     box-shadow: inset 0px 0px 200px rgba(0, 120, 50, 0.5);
 }
+
     .grey .block {
         background: rgba(0, 0, 0, 0.3);
     }
+
 html.pink, html.pink body {
     box-shadow: inset 0px 0px 200px rgba(0, 20, 5, 0.5);
-    background: pink;
+    background: #974776;
 }
+
     .pink .block {
         background: rgba(0, 30, 150, 0.05);
     }
