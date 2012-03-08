@@ -6,7 +6,7 @@ An awesome midi-based music adventure. (In the works...)
 
 Open htmlgame/index.html in your browser. (Note: The sound will not work unless you serve up this directory with a server like Apache or nginx. This is due to a limitation of Flash (via soundmanager2).)
 
-## Setup MIDI Reader
+## Using MIDI Reader
 
 The MIDI Reader is used to convert a midi file into a playable game.
 
