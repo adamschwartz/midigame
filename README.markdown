@@ -32,3 +32,8 @@ Right now this just installs Mercurial which is necessary to setup PyGame.
     python midi_reader.py
 
 That's it!
+
+# Copyright
+
+- All midi / music / sound / songs / artwork &copy; 2012 Adam Schwartz.
+- Game code (midi_reader.py and game.js) are MIT License.
