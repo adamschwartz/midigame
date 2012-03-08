@@ -5,7 +5,7 @@ import pprint
 import sys
 import pygame
 
-midi_file = 'mary.mid'
+midi_file = 'drums.mid'
 scale_y = 20
 scale_x = 0.5
 
