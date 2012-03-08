@@ -2,7 +2,13 @@
 
 An awesome midi-based music adventure. (In the works...)
 
-## Setup / Installation
+## Playing the game
+
+Open htmlgame/index.html in your browser. (Note: The sound will not work unless you serve up this directory with a server like Apache or nginx. This is due to a limitation of Flash (via soundmanager2).)
+
+## Setup MIDI Reader
+
+The MIDI Reader is used to convert a midi file into a playable game.
 
 ### Pip
 
@@ -21,8 +27,8 @@ Right now this just installs Mercurial which is necessary to setup PyGame.
     brew install sdl sdl_image sdl_mixer sdl_ttf smpeg portmidi
     pip install hg+http://bitbucket.org/pygame/pygame
 
-### Running the game
+### Running the MIDI Reader
 
-    python game.py
+    python midi_reader.py
 
 That's it!
