@@ -58,8 +58,8 @@ $(function() {
             'debug',
             'camera',
             'background',
-            'intro_background',
-            'song_background',
+            'intro',
+            'song',
             'ground',
             'dude'
         ]);
@@ -306,7 +306,7 @@ $(function() {
             }
         }
 
-        g.dom.song_background.css({
+        g.dom.song.css({
             left: 1184,
             width: (g.collisions[0].length * g.block_scale) - 1184
         });

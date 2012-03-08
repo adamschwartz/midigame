@@ -79,14 +79,14 @@ html, body {
     z-index: 10;
 }
 
-    .song_background {
+    #song {
         background: url(../img/backgrounds/graphy.png) 1px bottom;
         bottom: 32px;
         height: 100%;
         position: absolute;
     }
 
-    .intro_background {
+    #intro {
         background: url(../img/backgrounds/graphy-fade.png) 0px bottom;
         bottom: 32px;
         height: 100%;
