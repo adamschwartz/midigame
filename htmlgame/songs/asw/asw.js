@@ -36,7 +36,7 @@ game.songs.asw.game_map = [
 game.songs.asw.lowest_pitch = 36; //C1
 game.songs.asw.tempo = 9.6;
 game.songs.asw.scale = 32;
-game.songs.asw.base_auio_directory = 'songs/a-serious-woman/mp3/';
+game.songs.asw.base_auio_directory = 'songs/asw/mp3/';
 game.songs.asw.tracks = [
     'beans-and-rice-kit.mp3',
     'synth-bass.mp3',
