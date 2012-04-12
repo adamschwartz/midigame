@@ -1,5 +1,6 @@
 # midigame
 
+
 An awesome midi-based music adventure. (In the works...)
 
 ## Playing the game
